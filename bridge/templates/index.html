@@ -1,0 +1,19 @@
+{% extends './components/base.html' %}
+{% block content %}
+    <div class="row">
+        <form method="post" action="/">
+            {% csrf_token %}
+            {{ form.Text.label }}: {{ form.Text }}
+            <input type="submit" class="btn btn-primary mt-2 mb-2" value="Отправить">
+        </form>
+        {% if error %}
+            <p>Некорректные данные в форме</p>
+            <p>Подробности:</p>
+            {{ form.errors }}
+        {% endif %}
+        {% if has_data %}
+            {{ marked_map }}
+        {% endif %}
+    </div>
+
+{% endblock %}

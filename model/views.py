@@ -44,12 +44,12 @@ class AIModel:
         return self.addr_extractor.find(doc.text)
 
 
-class IndexView(View):
-    def get(self, request):
-        return render(request, 'index.html')
-
-    def post(self, request):
-        text = request.POST.get('text')
-        model = AIModel()
-        result = model.perform(text)
-        return render(request, 'index.html', {'result': result})
+# class IndexView(View):
+#     def get(self, request):
+#         return render(request, 'index.html')
+#
+#     def post(self, request):
+#         text = request.POST.get('text')
+#         model = AIModel()
+#         result = model.perform(text)
+#         return render(request, 'index.html', {'result': result})

@@ -18,7 +18,7 @@ class GeoCoderHandler:
         model = AIModel()
 
         # How it should actually work
-        # performed = model.perform(text)
+        # performed = [model.perform(line) for line in text.splitlines()]
 
         # res = [requests
         # .get(f'https://geocode-maps.yandex.ru/1.x/?apikey={API_KEY}&geocode={str}&format=json') for str in performed]]

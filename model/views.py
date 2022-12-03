@@ -30,19 +30,15 @@ class AIModel:
 
         self.names_extractor = NamesExtractor(self.morph_vocab)
 
-    def perform(self, text) -> list:
+    # TODO: Add spell check
+    def perform(self, text) -> str:
         doc = Doc(text)
-
         doc.segment(self.segmenter)
-
         doc.tag_ner(self.ner_tagger)
 
-        # for span in doc.spans:
-        #     if span.type == 'LOC':
-        #         print(f'Type: {span.type}, Text: {span.text}')
-
-        return self.addr_extractor.find(doc.text)
-
+        a = [span.text for span in doc.spans if span.type == 'LOC']
+        a.extend([f'{part.type} {part.value}' for part in self.addr_extractor.find(doc.text).fact.parts])
+        return ' '.join(a)
 
 # class IndexView(View):
 #     def get(self, request):

@@ -1,5 +1,7 @@
+import json
 from http.client import HTTPResponse
 
+from django.http import JsonResponse
 from django.views import View
 
 from MarkupAI.settings import YA_API_KEY
@@ -14,18 +16,14 @@ class GeoCoderHandler:
     def __init__(self):
         pass
 
-    def geocode(self, text: str) -> requests.Response.json:
-        model = AIModel()
+    def geocode(self, text: str):
 
         # How it should actually work
         # performed = [model.perform(line) for line in text.splitlines()]
 
         # res = [requests
         # .get(f'https://geocode-maps.yandex.ru/1.x/?apikey={API_KEY}&geocode={str}&format=json') for str in performed]]
-
-        performed = model.perform(text)[0]
-
-        res = requests.get(f'https://geocode-maps.yandex.ru/1.x/?apikey={YA_API_KEY}&geocode={performed}&format=json')
+        res = requests.get(f'https://geocode-maps.yandex.ru/1.x/?apikey={YA_API_KEY}&geocode={text}&format=json')
 
         return res.json()
 
@@ -33,23 +31,39 @@ class GeoCoderHandler:
 class GeoCoderView(View):
     def get(self, request):
         context = {
+            'api_key': YA_API_KEY,
             'has_data': False,
             'form': TextInputForm()
         }
         return render(request, 'index.html', context)
 
     def post(self, request):
+        handler = GeoCoderHandler()
+
         text = request.POST.get('Text')
-        # handler = GeoCoderHandler()
-        # res = handler.geocode(text)
-        result = AIModel().perform(text)
+        res = []
+
+        for line in text.splitlines():
+            if line == '':
+                continue
+
+            performed = AIModel().perform(line)
+            geocoded = handler.geocode(performed)
+
+            res.append({
+                'innerText': line,
+                'coords': geocoded['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split(' ')[::-1]
+            })
+
+        print(res)
 
         context = {
-            'marked_map': result,
-            'form': TextInputForm(),
+            'api_key': YA_API_KEY,
+            'marks': res,
             'has_data': True
         }
-        return render(request, 'index.html', context)
+
+        return JsonResponse(context)
 
     # def index(request) -> HTTPResponse:
     #     """

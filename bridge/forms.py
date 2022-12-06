@@ -7,6 +7,6 @@ class TextInputForm(forms.Form):
     :param Text: текст(максимальное кол-во знаков = 1000)
     """
     Text = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
         label='Text', min_length=10, max_length=1000, required=True
     )

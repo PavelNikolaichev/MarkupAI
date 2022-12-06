@@ -36,8 +36,12 @@ class AIModel:
         doc.segment(self.segmenter)
         doc.tag_ner(self.ner_tagger)
 
-        a = [span.text for span in doc.spans if span.type == 'LOC']
-        a.extend([f'{part.type} {part.value}' for part in self.addr_extractor.find(doc.text).fact.parts])
+        # a = [span.text for span in doc.spans if span.type == 'LOC']
+        a = []
+        segments = self.addr_extractor.find(doc.text)
+        if segments is not None:
+            a.extend([f'{part.type} {part.value}' if part.type is not None else f'{part.value}' for part in self.addr_extractor.find(doc.text).fact.parts])
+
         return ' '.join(a)
 
 # class IndexView(View):

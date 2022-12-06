@@ -1,7 +1,14 @@
 {% extends './components/base.html' %}
+
+{% block head %}
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{api_key}}&lang=ru_RU" type="text/javascript"></script>
+{% endblock %}
+<head>
+</head>
+
 {% block content %}
     <div class="row">
-        <form method="post" action="/">
+        <form method="post" id="textForm" action="/">
             {% csrf_token %}
             {{ form.Text.label }}: {{ form.Text }}
             <input type="submit" class="btn btn-primary mt-2 mb-2" value="Отправить">
@@ -16,4 +23,54 @@
         {% endif %}
     </div>
 
+    <div id="map" style="width: 600px; height: 400px"></div>
+
+{% endblock %}
+{% block scripts %}
+    <script>
+        main().then((x) => {
+            let map = x;
+
+            $(document).ready(function () {
+                $('#textForm').submit(function (e) {
+                    e.preventDefault();
+                    $.ajax({
+                        type: 'POST',
+                        url: '/',
+                        data: $(this).serialize(),
+                        success: function (data) {
+
+                            if (data.has_data) {
+                                {#map.geoObjects.removeAll();#}
+
+                                data.marks.forEach(function (item) {
+                                    createMark(item.innerText, item.coords);
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+
+            function createMark(innerText = '', coords = [0, 0]) {
+                const myMarker = new ymaps.Placemark(
+                    coords,
+                    properties = {
+                        {#iconContent: innerText,#}
+                        balloonContent: innerText
+                    },
+                );
+
+                map.geoObjects.add(myMarker);
+            }
+        })
+
+        async function main() {
+            await ymaps.ready();
+            return new ymaps.Map(document.getElementById('map'), {
+                    center: [55.76, 37.64],
+                    zoom: 11
+            });
+        }
+    </script>
 {% endblock %}

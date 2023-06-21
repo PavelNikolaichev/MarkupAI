@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.views import View
+
 from natasha import (
     Segmenter,
     MorphVocab,
@@ -8,14 +10,11 @@ from natasha import (
     NewsSyntaxParser,
     NewsNERTagger,
 
-    PER,
     NamesExtractor,
     AddrExtractor,
     Doc
 )
 
-
-# Create your views here.
 
 # TODO: make this class in the separate file. Also it would be cool to make an Interface or an Abstract class
 class AIModel:
@@ -31,27 +30,26 @@ class AIModel:
 
         self.names_extractor = NamesExtractor(self.morph_vocab)
 
-    def perform(self, text) -> list:
-        # TODO: clean up this mess.
+    # TODO: Add spell check
+    def perform(self, text) -> str:
         doc = Doc(text)
-
         doc.segment(self.segmenter)
-
         doc.tag_ner(self.ner_tagger)
-        # for span in doc.spans:
-        #     if span.type == 'LOC':
-        #         print(f'Type: {span.type}, Text: {span.text}')
 
-        prepared_data = []
+        # a = [span.text for span in doc.spans if span.type == 'LOC']
+        a = []
+        segments = self.addr_extractor.find(doc.text)
+        if segments is not None:
+            a.extend([f'{part.type} {part.value}' if part.type is not None else f'{part.value}' for part in self.addr_extractor.find(doc.text).fact.parts])
 
-        lines = [
-            'Россия, Вологодская обл. г. Череповец, пр.Победы 93 б',
-            '692909, РФ, Приморский край, г. Находка, ул. Добролюбова, 18',
-            'ул. Народного Ополчения д. 9к.3',
-            'В г.Москве загорелся дом на улице Ленина, 35.'
-        ]
+        return ' '.join(a)
 
-        for line in lines:
-            prepared_data.append([self.addr_extractor.find(line).fact, line])
-            display(self.addr_extractor.find(line).fact)
-            print(line)
+# class IndexView(View):
+#     def get(self, request):
+#         return render(request, 'index.html')
+#
+#     def post(self, request):
+#         text = request.POST.get('text')
+#         model = AIModel()
+#         result = model.perform(text)
+#         return render(request, 'index.html', {'result': result})
